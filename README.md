@@ -3,29 +3,26 @@
 
 ├── **gen_cov.sh**: replay for all the appointed workdirs, until finished. 
 
-├── **plot_cov.py**: plot the coverage to time plots for the appointed workdirs.
+├── **merge_cov_data.py**: distill and merge the coverage data to a csv file.
 
 └── **replay_finished.py**: ensure all seeds in a queue are replayed.
 
 # Usage
 ## gen_cov.sh
-gen_cov.sh assumes each (fuzzer, target) pair has 5 iterations, and replay for all 5 iterations in parallel. Convention of the workdir naming should be something like **out-\$target-\$fuzzer-000** (out-expat-tango-000)
+gen_cov.sh needs four inputs: target, fuzzer, relative path to the workdir 
+(without the ending "-00X"), and the number of iterations.
 
 ```
-./gen_cov.sh $target $fuzzer
+e.g.
+./gen_cov.sh openssh tango_nyxnet targets/openssh/out-openssh-tango_nyxnet 7
 ```
-**target**: expat, openssh, etc.
-
-**fuzzer**: name of the fuzzer. 
-
-## plot_cov.py
-plot_cov.py follows the same workdir naming convention as gen_cov.sh's. 
+## merge_cov_data.py
+merge_cov_data.py can output the merged coverage data into a appointed csv file.
+The parameters needed are: tuples of (target,fuzzer,relative path to the workdir 
+(without the ending "-00X")), output file name, and maximum number of iterations 
+among the workdirs (if targets/openssl/out-openssl-nyxnet has only 4 iterations, 
+while the input is 7, it will still work).  
 
 ```
-python plot_cov.py -t expat -o out.svg -f tango tango-mode0 tango-mode1
+python merge_cov_data.py -t "(openssh,tango_nyxnet,targets/openssh/out-openssh-tango_nyxnet)" "(openssh,nyxnet,targets/openssh/out-openssh-nyxnet)" "(dnsmasq,tango_nyxnet,targets/dnsmasq/out-dnsmasq-tango_nyxnet)" "(dnsmasq,tango_nyxnet,targets/dnsmasq/out-dnsmasq-tango_nyxnet)" -o out.csv -n 7
 ```
-**-t**: target name
-
-**-o**: output plot file name
-
-**-f**: fuzzer names

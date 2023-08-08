@@ -8,7 +8,7 @@ def parse_args():
     top.add_argument('-t', "--target", 
         help="The path to the TangoFuzz fuzz.json file.")
     top.add_argument('-w', "--workdirs", nargs='+',
-        help="Name of the workdirs.")
+        help="relative path to the workdirs.")
     return top.parse_args()
 
 # need to replace some characters ("," ":")
@@ -18,11 +18,11 @@ def process_seed_name(name):
     return new_name
 
 def check_workdir(target, workdir):
-    queue_path = os.path.join("targets", target, workdir, "queue")
+    queue_path = os.path.join(workdir, "queue")
     if not os.path.exists(queue_path):
         print(queue_path)
-        return [], None
-    shared_dir_path = os.path.join("targets", target, workdir, "fs/shared")
+        return None, None
+    shared_dir_path = os.path.join(workdir, "fs/shared")
     # only keep file seed names, excluding folders
     seeds = [] 
     for seed in os.listdir(queue_path):
@@ -51,17 +51,25 @@ def main():
 
     is_finished = True
     for workdir in args.workdirs:
-        for i in range(5):
-            not_processed, seeds_num = check_workdir(args.target, workdir + str(i))
-            # if not_processed:
-            #     print(workdir + str(i), "{}/{}".format(len(not_processed), seeds_num))
-            # else:
-            #     print(workdir + str(i), "finished")
-            if not_processed:
-                print(not_processed)
-                is_finished = False
-                print(is_finished)
-                return
+        not_processed, seeds_num = check_workdir(args.target, workdir)
+        
+        if not_processed is None or not_processed:
+            print(not_processed)
+            is_finished = False
+            print(is_finished)
+            return
+
+        # for i in range(7):
+        #     not_processed, seeds_num = check_workdir(args.target, workdir + str(i))
+        #     # if not_processed:
+        #     #     print(workdir + str(i), "{}/{}".format(len(not_processed), seeds_num))
+        #     # else:
+        #     #     print(workdir + str(i), "finished")
+        #     if not_processed:
+        #         print(not_processed)
+        #         is_finished = False
+        #         print(is_finished)
+        #         return
     print(is_finished)
 
 if __name__ == "__main__":
